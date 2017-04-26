@@ -1,0 +1,81 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.+')
+    }
+}
+
+group 'com.ehaqui'
+version '1.1.0'
+
+apply plugin: 'java'
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.artifactory"
+
+sourceCompatibility = 1.8
+
+repositories {
+
+    maven {
+        name = 'server.ehaqui.com-releases'
+        url = 'http://server.ehaqui.com:8081/artifactory/libs-release'
+    }
+
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.projectlombok:lombok:1.16.10'
+    compile 'org.spigot:spigot:1.11.2'
+    compile 'net.md-5:bungeecord:1.10'
+    compile 'net.milkbowl:Vault:1.5.6'
+    compile 'com.comphenix.protocol:ProtocolLib:4.2.1'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://server.ehaqui.com:8081/artifactory'
+    publish {
+        repository {
+            repoKey = 'libs-release' // The Artifactory repository key to publish to
+            username = "${artifactory_user}" // The publisher user name
+            password = "${artifactory_password}" // The publisher password
+        }
+        defaults {
+            // Reference to Gradle publications defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publications('mavenJava')
+            publishArtifacts = true
+            // Properties to be attached to the published artifacts.
+            properties = ['qa.level': 'basic', 'dev.team' : 'core']
+            // Publish generated POM files to Artifactory (true by default)
+            publishPom = true
+        }
+    }
+    resolve {
+        repoKey = 'jcenter'
+    }
+}
+
+processResources {
+    from('src/main/resources') {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+}
+
+task deployLocal(type: Copy, dependsOn: [jar]) {
+    from(jar)
+    into "C:/Users/Lucas/Dropbox/Servidor/Beta/server_hub/plugins"
+}

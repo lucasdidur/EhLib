@@ -1,0 +1,6 @@
+name: EhLib
+version: @version@
+main: com.ehaqui.ehlib.bukkit.EhLibSpigot
+authors: [Lucas Didur]
+depends: []
+

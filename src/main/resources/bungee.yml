@@ -1,0 +1,6 @@
+name: EhLib
+version: @version@
+main: com.ehaqui.ehlib.bungeecord.EhLibBungeecord
+authors: [Lucas Didur]
+depends: []
+
