@@ -25,7 +25,7 @@ public class Database
 
     private Connection conn = null;
     private Statement statement = null;
-    ;
+
     // rows col_name value
     private HashMap<Integer, HashMap<String, Object>> rows = new HashMap<>();
     private HashMap<String, Object> column = new HashMap<>();
@@ -44,7 +44,7 @@ public class Database
     private String dPass;
     private String fileName;
 
-    public String lastQuery;
+    private String lastQuery;
 
     public boolean debug = false;
     public String prefix = "[Database] ";
@@ -88,8 +88,7 @@ public class Database
                 if ("".equals(host) || host == null)
                 {
                     dbHost = "localhost";
-                }
-                else
+                } else
                 {
                     dbHost = host;
                 }
@@ -97,8 +96,7 @@ public class Database
                 if ("".equals(port) || port == null)
                 {
                     dbPort = "3306";
-                }
-                else
+                } else
                 {
                     dbPort = port;
                 }
@@ -120,8 +118,7 @@ public class Database
         if (getConnection() != null)
         {
             logger.info(prefix + "Connected!");
-        }
-        else
+        } else
         {
             logger.severe(prefix + "Erro na conexao com o Banco de dados");
         }
@@ -371,8 +368,7 @@ public class Database
             results.close();
 
             return column;
-        }
-        else
+        } else
             return null;
 
     }
@@ -423,8 +419,7 @@ public class Database
                 results.close();
 
                 return column;
-            }
-            else
+            } else
                 return null;
         } catch (SQLException e)
         {
@@ -487,8 +482,7 @@ public class Database
             results.close();
 
             return rows;
-        }
-        else
+        } else
             return null;
     }
 
@@ -546,8 +540,7 @@ public class Database
                 results.close();
 
                 return rows;
-            }
-            else
+            } else
                 return null;
         } catch (SQLException e)
         {
@@ -834,8 +827,7 @@ public class Database
 
                 idField.setAccessible(true);
                 idField.set(instance, keys.getInt(1));
-            }
-            else
+            } else
             {
                 PreparedStatement pstmt = conn.prepareStatement(lastQuery);
                 pstmt.executeUpdate();
@@ -874,7 +866,7 @@ public class Database
                 DatabaseField annotation = field.getAnnotation(DatabaseField.class);
                 if (annotation != null)
                 {
-                if (annotation.id() || annotation.key())
+                    if (annotation.id() || annotation.key())
                     {
                         idField = field;
                         idField.setAccessible(true);
@@ -954,8 +946,7 @@ public class Database
                     if (!annotation.id())
                     {
                         fields.put(field, annotation);
-                    }
-                    else
+                    } else
                     {
                         idAnnotation = annotation;
                     }
@@ -970,58 +961,61 @@ public class Database
 
         try
         {
-            sqlCreate.append("CREATE TABLE IF NOT EXISTS `" + table.value() + "` (");
-
-            if (idAnnotation != null)
+            if (fields.size() > 0)
             {
-                sqlCreate.append(idAnnotation.value() + " INT NOT NULL AUTO_INCREMENT, ");
-            }
+                sqlCreate.append("CREATE TABLE IF NOT EXISTS `" + table.value() + "` (");
 
-            int size = 1;
-            for (Entry<Field, DatabaseField> fieldI : fields.entrySet())
-            {
-                Field field = fieldI.getKey();
-                DatabaseField annotation = fieldI.getValue();
-
-                sqlCreate.append(annotation.value() + " ");
-
-                String fType;
-                if (!annotation.type().equals(""))
-                    fType = annotation.type();
-                else
-                    fType = getFieldType(field);
-
-                sqlCreate.append(fType + " ");
-
-                sqlCreate.append(annotation.nullField() ? " NULL" : " NOT NULL");
-
-                if (annotation.defaultValue().equals("CURRENT_TIMESTAMP"))
-                    sqlCreate.append(" DEFAULT '" + annotation.defaultValue() + "' ");
-                if (!annotation.defaultValue().equals(""))
-                    sqlCreate.append(" DEFAULT '" + annotation.defaultValue() + "' ");
-
-                sqlCreate.append(annotation.autoincrement() ? " AUTO_INCREMENT" : "");
-
-                sqlCreate.append(annotation.now() ? " DEFAULT CURRENT_TIMESTAMP" : "");
-
-                sqlCreate.append(annotation.unique() ? " UNIQUE" : "" + " ");
-
-                if (size < fields.size())
+                if (idAnnotation != null)
                 {
-                    sqlCreate.append(", \n");
-                    size++;
+                    sqlCreate.append(idAnnotation.value() + " INT NOT NULL AUTO_INCREMENT, ");
                 }
+
+                int size = 1;
+                for (Entry<Field, DatabaseField> fieldI : fields.entrySet())
+                {
+                    Field field = fieldI.getKey();
+                    DatabaseField annotation = fieldI.getValue();
+
+                    sqlCreate.append(annotation.value() + " ");
+
+                    String fType;
+                    if (!annotation.type().equals(""))
+                        fType = annotation.type();
+                    else
+                        fType = getFieldType(field);
+
+                    sqlCreate.append(fType + " ");
+
+                    sqlCreate.append(annotation.nullField() ? " NULL" : " NOT NULL");
+
+                    if (annotation.defaultValue().equals("CURRENT_TIMESTAMP"))
+                        sqlCreate.append(" DEFAULT '" + annotation.defaultValue() + "' ");
+                    if (!annotation.defaultValue().equals(""))
+                        sqlCreate.append(" DEFAULT '" + annotation.defaultValue() + "' ");
+
+                    sqlCreate.append(annotation.autoincrement() ? " AUTO_INCREMENT" : "");
+
+                    sqlCreate.append(annotation.now() ? " DEFAULT CURRENT_TIMESTAMP" : "");
+
+                    sqlCreate.append(annotation.unique() ? " UNIQUE" : "" + " ");
+
+                    if (size < fields.size())
+                    {
+                        sqlCreate.append(", \n");
+                        size++;
+                    }
+                }
+
+                if (idAnnotation != null)
+                {
+                    sqlCreate.append(", PRIMARY KEY ( " + idAnnotation.value() + " )");
+                }
+
+                sqlCreate.append(") ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+
+                PreparedStatement pstmt = conn.prepareStatement(sqlCreate.toString());
+                pstmt.executeUpdate();
             }
-
-            if (idAnnotation != null)
-            {
-                sqlCreate.append(", PRIMARY KEY ( " + idAnnotation.value() + " )");
-            }
-
-            sqlCreate.append(") ENGINE=InnoDB DEFAULT CHARSET=latin1;");
-
-            PreparedStatement pstmt = conn.prepareStatement(sqlCreate.toString());
-            pstmt.executeUpdate();
 
             DatabaseScript scripts = instance.getClass().getAnnotation(DatabaseScript.class);
 
@@ -1029,6 +1023,8 @@ public class Database
             {
                 for (String script : scripts.value())
                 {
+                    sqlCreate.append(script);
+
                     PreparedStatement pstmt2 = conn.prepareStatement(script);
                     pstmt2.executeUpdate();
                 }
@@ -1113,8 +1109,7 @@ public class Database
 
                     parseField(instance, field, rs, value);
                 }
-            }
-            else
+            } else
             {
                 return null;
             }
@@ -1271,28 +1266,22 @@ public class Database
         {
             if (rs.getString(value) != null)
                 field.set(instance, rs.getString(value).replace("&", "§"));
-        }
-        else if (field.getType() == Boolean.class || field.getType() == boolean.class)
+        } else if (field.getType() == Boolean.class || field.getType() == boolean.class)
         {
             field.set(instance, rs.getBoolean(value));
-        }
-        else if (field.getType() == Integer.class || field.getType() == int.class)
+        } else if (field.getType() == Integer.class || field.getType() == int.class)
         {
             field.set(instance, rs.getInt(value));
-        }
-        else if (field.getType() == Timestamp.class || field.getType() == Date.class)
+        } else if (field.getType() == Timestamp.class || field.getType() == Date.class)
         {
             field.set(instance, rs.getTimestamp(value));
-        }
-        else if (field.getType() == Long.class || field.getType() == long.class)
+        } else if (field.getType() == Long.class || field.getType() == long.class)
         {
             field.set(instance, rs.getLong(value));
-        }
-        else if (field.getType() == Double.class || field.getType() == double.class)
+        } else if (field.getType() == Double.class || field.getType() == double.class)
         {
             field.set(instance, rs.getDouble(value));
-        }
-        else if (field.getType() == UUID.class)
+        } else if (field.getType() == UUID.class)
         {
             try
             {
@@ -1301,12 +1290,10 @@ public class Database
             {
                 field.set(instance, null);
             }
-        }
-        else if (field.getType() == List.class)
+        } else if (field.getType() == List.class)
         {
             field.set(instance, new ArrayList<>(Arrays.asList(rs.getString(value).split("::"))));
-        }
-        else if (field.getType() == Sound.class)
+        } else if (field.getType() == Sound.class)
         {
             Sound tmp = null;
 
@@ -1314,8 +1301,7 @@ public class Database
                 tmp = Sound.valueOf(rs.getString(value).toUpperCase());
 
             field.set(instance, tmp);
-        }
-        else if (field.getType() == ItemStack.class)
+        } else if (field.getType() == ItemStack.class)
         {
             String tmp = rs.getString(value);
 
@@ -1331,21 +1317,18 @@ public class Database
             {
                 field.set(instance, SingleItemSerialization.getItem(tmp));
             }
-        }
-        else if (field.getType() == Inventory.class)
+        } else if (field.getType() == Inventory.class)
         {
             String tmp = rs.getString(value);
 
             if (tmp == null || tmp.equals(""))
             {
                 field.set(instance, "");
-            }
-            else
+            } else
             {
                 field.set(instance, InventorySerialization.getInventory(rs.getString(value)));
             }
-        }
-        else if (field.getType() == Location.class)
+        } else if (field.getType() == Location.class)
         {
             String[] locations = rs.getString(value).split(",");
 
@@ -1392,20 +1375,16 @@ public class Database
         else if (field.getType() == List.class)
         {
             return TextUtils.join("::", (List<String>) value);
-        }
-        else if (field.getType() == Sound.class)
+        } else if (field.getType() == Sound.class)
         {
             return ((Sound) value).toString();
-        }
-        else if (field.getType() == ItemStack.class)
+        } else if (field.getType() == ItemStack.class)
         {
             return SingleItemSerialization.serializeItemAsString((ItemStack) value);
-        }
-        else if (field.getType() == Inventory.class)
+        } else if (field.getType() == Inventory.class)
         {
             return InventorySerialization.serializeInventory((Inventory) value);
-        }
-        else if (field.getType() == Location.class)
+        } else if (field.getType() == Location.class)
         {
             Location l = (Location) value;
 

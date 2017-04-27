@@ -10,13 +10,14 @@ buildscript {
 }
 
 group 'com.ehaqui'
-version '1.1.0'
+version '1.1.1'
 
 apply plugin: 'java'
 apply plugin: "maven-publish"
 apply plugin: "com.jfrog.artifactory"
 
 sourceCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
 
