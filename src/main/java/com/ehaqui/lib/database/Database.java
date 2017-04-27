@@ -88,7 +88,8 @@ public class Database
                 if ("".equals(host) || host == null)
                 {
                     dbHost = "localhost";
-                } else
+                }
+                else
                 {
                     dbHost = host;
                 }
@@ -96,7 +97,8 @@ public class Database
                 if ("".equals(port) || port == null)
                 {
                     dbPort = "3306";
-                } else
+                }
+                else
                 {
                     dbPort = port;
                 }
@@ -118,7 +120,8 @@ public class Database
         if (getConnection() != null)
         {
             logger.info(prefix + "Connected!");
-        } else
+        }
+        else
         {
             logger.severe(prefix + "Erro na conexao com o Banco de dados");
         }
@@ -225,7 +228,7 @@ public class Database
             {
                 logger.info(prefix + "Criando tablela '" + tableName + "'");
                 setLastQuery(query);
-                update(query);
+                update(query, "");
             }
 
         } catch (Exception e)
@@ -368,7 +371,8 @@ public class Database
             results.close();
 
             return column;
-        } else
+        }
+        else
             return null;
 
     }
@@ -419,7 +423,8 @@ public class Database
                 results.close();
 
                 return column;
-            } else
+            }
+            else
                 return null;
         } catch (SQLException e)
         {
@@ -482,7 +487,8 @@ public class Database
             results.close();
 
             return rows;
-        } else
+        }
+        else
             return null;
     }
 
@@ -540,7 +546,8 @@ public class Database
                 results.close();
 
                 return rows;
-            } else
+            }
+            else
                 return null;
         } catch (SQLException e)
         {
@@ -771,7 +778,7 @@ public class Database
         DatabaseTable table = instance.getClass().getAnnotation(DatabaseTable.class);
 
         if (table == null)
-            throw new IllegalArgumentException("class has not a table annotation");
+            throw new IllegalArgumentException("class '" + instance.getClass() + "' has not a table annotation");
 
         String tableName = table.value();
         Field idField = null;
@@ -827,7 +834,8 @@ public class Database
 
                 idField.setAccessible(true);
                 idField.set(instance, keys.getInt(1));
-            } else
+            }
+            else
             {
                 PreparedStatement pstmt = conn.prepareStatement(lastQuery);
                 pstmt.executeUpdate();
@@ -851,7 +859,7 @@ public class Database
         DatabaseTable table = instance.getClass().getAnnotation(DatabaseTable.class);
 
         if (table == null)
-            throw new IllegalArgumentException("class has not a table annotation");
+            throw new IllegalArgumentException("class '" + instance.getClass() + "' has not a table annotation");
 
         String tableName = table.value();
         Field idField = null;
@@ -926,7 +934,7 @@ public class Database
         DatabaseTable table = instance.getClass().getAnnotation(DatabaseTable.class);
 
         if (table == null)
-            throw new IllegalArgumentException("class has not a table annotation");
+            throw new IllegalArgumentException("class '" + instance.getClass() + "' has not a table annotation " + classz.toGenericString());
 
         if (checkTable(table.value()))
             return false;
@@ -946,7 +954,8 @@ public class Database
                     if (!annotation.id())
                     {
                         fields.put(field, annotation);
-                    } else
+                    }
+                    else
                     {
                         idAnnotation = annotation;
                     }
@@ -1061,7 +1070,7 @@ public class Database
         DatabaseTable table = instance.getClass().getAnnotation(DatabaseTable.class);
 
         if (table == null)
-            throw new IllegalArgumentException("class has not a table annotation");
+            throw new IllegalArgumentException("class '" + instance.getClass() + "'has not a table annotation" + clasz.toGenericString());
 
         String tableName = table.value();
 
@@ -1109,7 +1118,8 @@ public class Database
 
                     parseField(instance, field, rs, value);
                 }
-            } else
+            }
+            else
             {
                 return null;
             }
@@ -1139,7 +1149,7 @@ public class Database
         DatabaseTable table = clazz.getAnnotation(DatabaseTable.class);
 
         if (table == null)
-            throw new IllegalArgumentException("class has not a table annotation");
+            throw new IllegalArgumentException("class '" + classToLoad.getClass() + "'has not a table annotation" + clasz.toGenericString());
 
         String tableName = table.value();
 
@@ -1210,7 +1220,7 @@ public class Database
         DatabaseTable table = instance.getClass().getAnnotation(DatabaseTable.class);
 
         if (table == null)
-            throw new IllegalArgumentException("class has not a table annotation");
+            throw new IllegalArgumentException("class '" + instance.getClass() + "'has not a table annotation");
 
         String tableName = table.value();
 
@@ -1266,22 +1276,28 @@ public class Database
         {
             if (rs.getString(value) != null)
                 field.set(instance, rs.getString(value).replace("&", "§"));
-        } else if (field.getType() == Boolean.class || field.getType() == boolean.class)
+        }
+        else if (field.getType() == Boolean.class || field.getType() == boolean.class)
         {
             field.set(instance, rs.getBoolean(value));
-        } else if (field.getType() == Integer.class || field.getType() == int.class)
+        }
+        else if (field.getType() == Integer.class || field.getType() == int.class)
         {
             field.set(instance, rs.getInt(value));
-        } else if (field.getType() == Timestamp.class || field.getType() == Date.class)
+        }
+        else if (field.getType() == Timestamp.class || field.getType() == Date.class)
         {
             field.set(instance, rs.getTimestamp(value));
-        } else if (field.getType() == Long.class || field.getType() == long.class)
+        }
+        else if (field.getType() == Long.class || field.getType() == long.class)
         {
             field.set(instance, rs.getLong(value));
-        } else if (field.getType() == Double.class || field.getType() == double.class)
+        }
+        else if (field.getType() == Double.class || field.getType() == double.class)
         {
             field.set(instance, rs.getDouble(value));
-        } else if (field.getType() == UUID.class)
+        }
+        else if (field.getType() == UUID.class)
         {
             try
             {
@@ -1290,10 +1306,12 @@ public class Database
             {
                 field.set(instance, null);
             }
-        } else if (field.getType() == List.class)
+        }
+        else if (field.getType() == List.class)
         {
             field.set(instance, new ArrayList<>(Arrays.asList(rs.getString(value).split("::"))));
-        } else if (field.getType() == Sound.class)
+        }
+        else if (field.getType() == Sound.class)
         {
             Sound tmp = null;
 
@@ -1301,7 +1319,8 @@ public class Database
                 tmp = Sound.valueOf(rs.getString(value).toUpperCase());
 
             field.set(instance, tmp);
-        } else if (field.getType() == ItemStack.class)
+        }
+        else if (field.getType() == ItemStack.class)
         {
             String tmp = rs.getString(value);
 
@@ -1317,18 +1336,21 @@ public class Database
             {
                 field.set(instance, SingleItemSerialization.getItem(tmp));
             }
-        } else if (field.getType() == Inventory.class)
+        }
+        else if (field.getType() == Inventory.class)
         {
             String tmp = rs.getString(value);
 
             if (tmp == null || tmp.equals(""))
             {
                 field.set(instance, "");
-            } else
+            }
+            else
             {
                 field.set(instance, InventorySerialization.getInventory(rs.getString(value)));
             }
-        } else if (field.getType() == Location.class)
+        }
+        else if (field.getType() == Location.class)
         {
             String[] locations = rs.getString(value).split(",");
 
@@ -1375,16 +1397,20 @@ public class Database
         else if (field.getType() == List.class)
         {
             return TextUtils.join("::", (List<String>) value);
-        } else if (field.getType() == Sound.class)
+        }
+        else if (field.getType() == Sound.class)
         {
             return ((Sound) value).toString();
-        } else if (field.getType() == ItemStack.class)
+        }
+        else if (field.getType() == ItemStack.class)
         {
             return SingleItemSerialization.serializeItemAsString((ItemStack) value);
-        } else if (field.getType() == Inventory.class)
+        }
+        else if (field.getType() == Inventory.class)
         {
             return InventorySerialization.serializeInventory((Inventory) value);
-        } else if (field.getType() == Location.class)
+        }
+        else if (field.getType() == Location.class)
         {
             Location l = (Location) value;
 
