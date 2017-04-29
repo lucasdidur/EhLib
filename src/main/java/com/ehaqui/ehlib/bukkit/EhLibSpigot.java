@@ -7,6 +7,8 @@ import com.ehaqui.lib.config.model.FlagPlugin;
 import com.ehaqui.lib.config.model.Players;
 import com.ehaqui.lib.database.Database;
 import com.ehaqui.lib.interfaces.Library;
+import com.ehaqui.lib.message.Message;
+import com.ehaqui.lib.packet.PacketLib;
 import com.ehaqui.lib.vault.Vault;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -17,6 +19,9 @@ import java.util.List;
 
 public final class EhLibSpigot extends JavaPlugin
 {
+    @Getter
+    private String serverVersion = getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+
     @Getter
     private static EhLibSpigot instance;
 
@@ -31,6 +36,9 @@ public final class EhLibSpigot extends JavaPlugin
     @Getter
     private static Configuration configg;
 
+    @Getter
+    private static String prefix = "[EhLib] ";
+
     private static List<Library> libs = new ArrayList<>();
 
     @Override
@@ -42,6 +50,7 @@ public final class EhLibSpigot extends JavaPlugin
 
         setupLibs();
         loadLibs();
+        PacketLib.setupPackets();
 
         setupGlobalDatabase();
         setupLocalDatabase();
@@ -122,4 +131,8 @@ public final class EhLibSpigot extends JavaPlugin
         return false;
     }
 
+    public void sendConsoleMessage(String message)
+    {
+        getServer().getConsoleSender().sendMessage(Message.colorize(getPrefix() + message));
+    }
 }

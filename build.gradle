@@ -10,7 +10,7 @@ buildscript {
 }
 
 group 'com.ehaqui'
-version '1.1.1'
+version '1.2.0'
 
 apply plugin: 'java'
 apply plugin: "maven-publish"
@@ -19,6 +19,9 @@ apply plugin: "com.jfrog.artifactory"
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
+jar.archiveName = "${jar.baseName}.${jar.extension}"
+
+
 repositories {
 
     maven {
@@ -26,15 +29,29 @@ repositories {
         url = 'http://server.ehaqui.com:8081/artifactory/libs-release'
     }
 
+    maven {
+        name = 'server.ehaqui.com-releases'
+        url = 'http://server.ehaqui.com:8081/artifactory/libs-release-local'
+    }
+
     mavenCentral()
 }
-
 dependencies {
     compile 'org.projectlombok:lombok:1.16.10'
-    compile 'org.spigot:spigot:1.11.2'
-    compile 'net.md-5:bungeecord:1.10'
-    compile 'net.milkbowl:Vault:1.5.6'
-    compile 'com.comphenix.protocol:ProtocolLib:4.2.1'
+
+    compile(group: 'org.spigotmc', name: 'spigot-1.11.2-r1', version: 'r1')
+    compile(group: 'org.spigotmc', name: 'spigot-1.10.2-r1', version: 'r1')
+    compile(group: 'org.spigotmc', name: 'spigot-1.9.4-r2', version: 'r2')
+    compile(group: 'org.spigotmc', name: 'spigot-1.9-r1', version: 'r1')
+    compile(group: 'org.spigotmc', name: 'spigot-1.8.8-r3', version: 'r3')
+    compile(group: 'org.spigotmc', name: 'spigot-1.8-r2', version: 'r2')
+    compile(group: 'org.spigotmc', name: 'spigot-1.8-r1', version: 'r1')
+    compile(group: 'org.spigotmc', name: 'spigot-1.7-r4', version: 'r4')
+
+
+    compile(group: 'net.md-5', name: 'bungeecord', version: '1175')
+    compile(group: 'net.milkbowl', name: 'Vault', version: '1.5.6')
+    compile(group: 'com.comphenix.protocol', name: 'ProtocolLib', version: '4.2.1')
 }
 
 publishing {
@@ -49,7 +66,7 @@ artifactory {
     contextUrl = 'http://server.ehaqui.com:8081/artifactory'
     publish {
         repository {
-            repoKey = 'libs-release' // The Artifactory repository key to publish to
+            repoKey = 'libs-release-local' // The Artifactory repository key to publish to
             username = "${artifactory_user}" // The publisher user name
             password = "${artifactory_password}" // The publisher password
         }
