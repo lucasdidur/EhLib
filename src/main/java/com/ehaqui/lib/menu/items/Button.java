@@ -220,7 +220,11 @@ public Button<T> setIcon(Material material)
 
     public Button<T> addLore(String lore, Object... args)
     {
-        this.lore.add(ChatColor.translateAlternateColorCodes('&', "&r" + String.format(lore, args)).replace("\r", ""));
+        for (String string: lore.split("\n"))
+        {
+            this.lore.add(ChatColor.translateAlternateColorCodes('&', "&r" + String.format(string, args)).replace("\r", ""));
+        }
+
         return this;
     }
 
@@ -235,7 +239,7 @@ public Button<T> setIcon(Material material)
         this.lore.clear();
         for (String string : lore)
         {
-            this.lore.add(ChatColor.translateAlternateColorCodes('&', "&r" + string).replace("\r", ""));
+            addLore(string);
         }
 
         return this;

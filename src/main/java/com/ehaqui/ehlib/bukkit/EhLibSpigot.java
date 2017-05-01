@@ -131,8 +131,8 @@ public final class EhLibSpigot extends JavaPlugin
         return false;
     }
 
-    public void sendConsoleMessage(String message)
+    public static void sendConsoleMessage(String message)
     {
-        getServer().getConsoleSender().sendMessage(Message.colorize(getPrefix() + message));
+       getInstance().getServer().getConsoleSender().sendMessage(Message.colorize(getPrefix() + message));
     }
 }
